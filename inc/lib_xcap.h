@@ -170,16 +170,18 @@ xcap_get(xcap_request *a_request);
  *
  * \param a_request XCAP object
  * \param a_body http body content
+ * \return status code
  */
-void
+int
 xcap_put(xcap_request *a_request, char *a_body);
 
 /**
  * DELETE XCAP request
  *
  * \param a_request XCAP object
+ * \return status code
  */
-void
+int
 xcap_del(xcap_request *a_request);
 
 #endif

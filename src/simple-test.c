@@ -18,8 +18,10 @@ int main(int argc, char *argv[])
     xcap_set_home_directory(request, "index");
     xcap_set_username(request, "gaojb");
     xcap_set_password(request, "123456");
-    xcap_get(request);
-    printf("bbb %s\n", request->io_buf);
+    if (xcap_get(request) == SCODE_OK)
+    {
+        printf("%s\n", request->io_buf);
+    }
     xcap_request_destroy(request);
     return 0;
 }
@@ -74,7 +76,10 @@ int main(int argc, char *argv[])
     xcap_set_home_directory(request, "index");
     xcap_set_username(request, "gaojb");
     xcap_set_password(request, "123456");
-    xcap_put(request, pres_rules);
+    if (xcap_put(request, pres_rules) == SCODE_OK)
+    {
+        printf("Put success!\n");
+    }
     xcap_request_destroy(request);
     return 0;
 }
@@ -90,7 +95,10 @@ int main(int argc, char *argv[])
     xcap_set_home_directory(request, "index");
     xcap_set_username(request, "gaojb");
     xcap_set_password(request, "123456");
-    xcap_del(request);
+    if (xcap_del(request) == SCODE_OK)
+    {
+        printf("Delete success!\n");
+    }
     xcap_request_destroy(request);
     return 0;
 }

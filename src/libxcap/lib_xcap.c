@@ -192,9 +192,10 @@ xcap_get(xcap_request *a_request)
     return result;
 }
 
-void
+int
 xcap_put(xcap_request *a_request, char *a_body)
 {
+    int result = -1;
     ghttp_request *request = NULL;
     char *body_buf = NULL;
     char *io_buf = NULL;
@@ -208,6 +209,7 @@ xcap_put(xcap_request *a_request, char *a_body)
     ghttp_set_body(request, a_body, strlen(a_body));
     ghttp_prepare(request);
     ghttp_process(request);
+    result = ghttp_status_code(request);
     if (ghttp_status_code(request) == 401)
     {
         char *ghttp_digest_value = NULL;
@@ -225,14 +227,17 @@ xcap_put(xcap_request *a_request, char *a_body)
         ghttp_set_body(request_new, a_body, strlen(a_body));
         ghttp_prepare(request_new);
         ghttp_process(request_new);
+        result = ghttp_status_code(request_new);
         ghttp_request_destroy(request_new);
     }
     ghttp_request_destroy(request);
+    return result;
 }
 
-void
+int
 xcap_del(xcap_request *a_request)
 {
+    int result = -1;
     ghttp_request *request = NULL;
     char *body_buf = NULL;
     char *io_buf = NULL;
@@ -244,6 +249,7 @@ xcap_del(xcap_request *a_request)
     ghttp_set_header(request, http_hdr_Connection, "close");
     ghttp_prepare(request);
     ghttp_process(request);
+    result = ghttp_status_code(request);
     if (ghttp_status_code(request) == 401)
     {
         char *ghttp_digest_value = NULL;
@@ -259,7 +265,9 @@ xcap_del(xcap_request *a_request)
                          ghttp_digest_value);
         ghttp_prepare(request_new);
         ghttp_process(request_new);
+        result = ghttp_status_code(request_new);
         ghttp_request_destroy(request_new);
     }
     ghttp_request_destroy(request);
+    return result;
 }
