@@ -5,6 +5,7 @@
 #include "lib_xcap.h"
 #include "ezxml.h"
 #include "digcalc.h"
+#include "lib_contact_manager.h"
 
 #if defined(TEST_GET)
 int main(int argc, char *argv[])
@@ -13,6 +14,7 @@ int main(int argc, char *argv[])
     request = xcap_request_new();
     //http://10.35.57.251/xcap-root/pres-rules/users/sip:gaojb@10.35.57.251/index
     xcap_set_host(request, "10.35.57.251");
+    xcap_set_root(request, "xcap-root");
     xcap_set_auid(request, "pres-rules");
     xcap_set_xui(request, "sip:gaojb@10.35.57.251");
     xcap_set_home_directory(request, "index");
@@ -71,12 +73,13 @@ int main(int argc, char *argv[])
     request = xcap_request_new();
     //http://10.35.57.251/xcap-root/pres-rules/users/sip:gaojb@10.35.57.251/index
     xcap_set_host(request, "10.35.57.251");
+    xcap_set_root(request, "xcap-root");
     xcap_set_auid(request, "pres-rules");
     xcap_set_xui(request, "sip:gaojb@10.35.57.251");
     xcap_set_home_directory(request, "index");
     xcap_set_username(request, "gaojb");
     xcap_set_password(request, "123456");
-    if (xcap_put(request, pres_rules) == SCODE_OK)
+    if (xcap_put(request, " ", pres_rules) == SCODE_OK)
     {
         printf("Put success!\n");
     }
@@ -90,6 +93,7 @@ int main(int argc, char *argv[])
     request = xcap_request_new();
     //http://10.35.57.251/xcap-root/pres-rules/users/sip:gaojb@10.35.57.251/index
     xcap_set_host(request, "10.35.57.251");
+    xcap_set_root(request, "xcap-root");
     xcap_set_auid(request, "pres-rules");
     xcap_set_xui(request, "sip:gaojb@10.35.57.251");
     xcap_set_home_directory(request, "index");
@@ -126,6 +130,40 @@ void main(int argc, char **argv)
                        pszMethod, pszURI, HA2, Response);
     printf("Response = %s\n", Response);
 };
+#elif defined(TEST_GET_CONTACT)
+int main(int argc, char **argv)
+{
+    contact_request *request = contact_request_new();
+    contact_list *list = contact_list_new();
+    contact_list *p = list;
+    contact_query(request, list);
+    for (; p; p = p->next)
+    {
+        if (p != NULL)
+            printf("%s %s\n", p->uri, p->name);
+    }
+    contact_list_destroy(list);
+    contact_request_destroy(request);
+    return 0;
+};
+#elif defined(TEST_PUT_CONTACT)
+int main(int argc, char **argv)
+{
+    contact_request *request = contact_request_new();
+    contact_list *list = contact_list_new();
+    contact_add(request, "sip:gaojb1@10.35.57.251", "gaojb1");
+    contact_request_destroy(request);
+    return 0;
+}
+#elif defined(TEST_DEL_CONTACT)
+int main(int argc, char **argv)
+{
+    contact_request *request = contact_request_new();
+    contact_list *list = contact_list_new();
+    contact_del(request, "sip:gaojb1@10.35.57.251");
+    contact_request_destroy(request);
+    return 0;
+}
 #else
 int main(int argc, char *argv[])
 {

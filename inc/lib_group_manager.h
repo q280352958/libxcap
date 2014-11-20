@@ -18,7 +18,7 @@ group_request_new();
  * \param a_request GROUP REQUEST object
  */
 void
-group_request_destory(group_request *a_request);
+group_request_destroy(group_request *a_request);
 
 /**
  * Create an empty GROUP LIST object
@@ -34,7 +34,7 @@ group_list_new();
  * \param a_list GROUP LIST object
  */
 void
-group_list_destory(group_list *a_list);
+group_list_destroy(group_list *a_list);
 
 /**
  * Parse GROUP LIST content

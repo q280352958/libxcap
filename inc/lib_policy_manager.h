@@ -18,7 +18,7 @@ policy_request_new();
  * \param a_request POLICY REQUEST object
  */
 void
-policy_request_destory(policy_request *a_request);
+policy_request_destroy(policy_request *a_request);
 
 /**
  * Create an empty POLICY LIST object
@@ -34,7 +34,7 @@ policy_list_new();
  * \param a_list POLICY LIST object
  */
 void
-policy_list_destory(policy_list *a_list);
+policy_list_destroy(policy_list *a_list);
 
 /**
  * Parse POLICY LIST content

@@ -10,7 +10,7 @@ MKDIR := mkdir -p
 
 CFLAGS := -g -I$(PROJECT_INC_DIR)
 LDFLAG := -L$(PROJECT_LIB_DIR)
-DEFLAG := -D TEST_GET
+DEFLAG := -D TEST_PUT_CONTACT
 
 src :=$(wildcard $(PROJECT_SRC_DIR)/*.c) \
 	$(wildcard $(PROJECT_SRC_DIR)/libmd5/*.c) \
@@ -50,4 +50,4 @@ all:$(PROJECT_ALL_OBJS)
 
 clean:
 	rm -fr $(PROJECT_OBJ_DIR)
-	rm -fr $(PROJECT_BIN_DIR)	
+	rm $(PROJECT_BIN_DIR)/$(TARGETS)

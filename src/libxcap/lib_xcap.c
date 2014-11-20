@@ -14,7 +14,7 @@ xcap_uri_new(void)
 }
 
 void
-xcap_uri_destory(xcap_uri *a_uri)
+xcap_uri_destroy(xcap_uri *a_uri)
 {
     if (!a_uri)
         return;
@@ -22,6 +22,11 @@ xcap_uri_destory(xcap_uri *a_uri)
     {
         free(a_uri->xcap_host);
         a_uri->xcap_host = NULL;
+    }
+    if (a_uri->xcap_root)
+    {
+        free(a_uri->xcap_root);
+        a_uri->xcap_root = NULL;
     }
     if (a_uri->xcap_auid)
     {
@@ -63,7 +68,7 @@ xcap_request_destroy(xcap_request *a_request)
         return;
     if (a_request->uri)
     {
-        xcap_uri_destory(a_request->uri);
+        xcap_uri_destroy(a_request->uri);
     }
     if (a_request->username)
     {
@@ -74,6 +79,11 @@ xcap_request_destroy(xcap_request *a_request)
     {
         free(a_request->password);
         a_request->password = NULL;
+    }
+    if (a_request->body_data)
+    {
+        free(a_request->body_data);
+        a_request->body_data = NULL;
     }
     if (a_request->io_buf)
     {
@@ -87,6 +97,12 @@ void
 xcap_set_host(xcap_request *a_request, const char *a_host)
 {
     a_request->uri->xcap_host = strdup(a_host);
+}
+
+void
+xcap_set_root(xcap_request *a_request, const char *a_root)
+{
+    a_request->uri->xcap_root = strdup(a_root);
 }
 
 void
@@ -120,31 +136,49 @@ xcap_set_password(xcap_request *a_request, const char *a_password)
 }
 
 void
-xcap_uri_encode(xcap_uri *a_uri)
+xcap_set_body(xcap_request *a_request, const char *a_body)
+{
+    a_request->body_data = strdup(a_body);
+}
+
+void
+xcap_uri_encode(xcap_uri *a_uri, char *a_attr)
 {
     const char HTTP_HEADER[] = "http://";
-    const char XCAP_ROOT[] = "/xcap-root/";
     const char USERS[] = "/users/";
     const char SLASH[] = "/";
     int length = 0;
+
     length = strlen(HTTP_HEADER)
              + strlen(a_uri->xcap_host)
-             + strlen(XCAP_ROOT)
+             + strlen(SLASH)
+             + strlen(a_uri->xcap_root)
+             + strlen(SLASH)
              + strlen(a_uri->xcap_auid)
              + strlen(USERS)
              + strlen(a_uri->xcap_xui)
              + strlen(SLASH)
              + strlen(a_uri->xcap_home_directory);
+    if (a_attr)
+    {
+        length += strlen(a_attr);
+    }
     a_uri->full = (char *)malloc(length);
     memset(a_uri->full, 0, length);
     strncat(a_uri->full, HTTP_HEADER, strlen(HTTP_HEADER));
     strncat(a_uri->full, a_uri->xcap_host, strlen(a_uri->xcap_host));
-    strncat(a_uri->full, XCAP_ROOT, strlen(XCAP_ROOT));
+    strncat(a_uri->full, SLASH, strlen(SLASH));
+    strncat(a_uri->full, a_uri->xcap_root, strlen(a_uri->xcap_root));
+    strncat(a_uri->full, SLASH, strlen(SLASH));
     strncat(a_uri->full, a_uri->xcap_auid, strlen(a_uri->xcap_auid));
     strncat(a_uri->full, USERS, strlen(USERS));
     strncat(a_uri->full, a_uri->xcap_xui, strlen(a_uri->xcap_xui));
     strncat(a_uri->full, SLASH, strlen(SLASH));
     strncat(a_uri->full, a_uri->xcap_home_directory, strlen(a_uri->xcap_home_directory));
+    if (a_attr)
+    {
+        strncat(a_uri->full, a_attr, strlen(a_attr));
+    }
 }
 
 int
@@ -154,7 +188,7 @@ xcap_get(xcap_request *a_request)
     ghttp_request *request = NULL;
     char *body_buf = NULL;
     request = ghttp_request_new();
-    xcap_uri_encode(a_request->uri);
+    xcap_uri_encode(a_request->uri, NULL);
     ghttp_set_uri(request, a_request->uri->full);
     ghttp_set_header(request, http_hdr_Connection, "close");
     ghttp_prepare(request);
@@ -193,19 +227,20 @@ xcap_get(xcap_request *a_request)
 }
 
 int
-xcap_put(xcap_request *a_request, char *a_body)
+xcap_put(xcap_request *a_request, char *a_attr, char *a_body)
 {
     int result = -1;
     ghttp_request *request = NULL;
     char *body_buf = NULL;
     char *io_buf = NULL;
     request = ghttp_request_new();
-    xcap_uri_encode(a_request->uri);
+    xcap_uri_encode(a_request->uri, a_attr);
     ghttp_set_uri(request, a_request->uri->full);
     ghttp_set_type(request, ghttp_type_put);
     ghttp_set_header(request, http_hdr_Accept_Encoding, "identity");
     ghttp_set_header(request, http_hdr_Connection, "close");
-    ghttp_set_header(request, http_hdr_Content_Type, "application/x-www-form-urlencoded");
+    ghttp_set_header(request, http_hdr_Content_Type, "application/xcap-el+xml");
+    //ghttp_set_header(request, http_hdr_Content_Type, "application/x-www-form-urlencoded");
     ghttp_set_body(request, a_body, strlen(a_body));
     ghttp_prepare(request);
     ghttp_process(request);
@@ -219,7 +254,8 @@ xcap_put(xcap_request *a_request, char *a_body)
         ghttp_set_type(request_new, ghttp_type_put);
         ghttp_set_header(request_new, http_hdr_Accept_Encoding, "identity");
         ghttp_set_header(request_new, http_hdr_Connection, "close");
-        ghttp_set_header(request_new, http_hdr_Content_Type, "application/x-www-form-urlencoded");
+        ghttp_set_header(request_new, http_hdr_Content_Type, "application/xcap-el+xml");
+        //ghttp_set_header(request, http_hdr_Content_Type, "application/x-www-form-urlencoded");
         ghttp_digest_value = ghttp_digest_encode(request_new, a_request->username, a_request->password, unauthorized_data);
         ghttp_set_header(request_new,
                          http_hdr_Authorization,
@@ -235,14 +271,14 @@ xcap_put(xcap_request *a_request, char *a_body)
 }
 
 int
-xcap_del(xcap_request *a_request)
+xcap_del(xcap_request *a_request, char *a_attr)
 {
     int result = -1;
     ghttp_request *request = NULL;
     char *body_buf = NULL;
     char *io_buf = NULL;
     request = ghttp_request_new();
-    xcap_uri_encode(a_request->uri);
+    xcap_uri_encode(a_request->uri, a_attr);
     ghttp_set_uri(request, a_request->uri->full);
     ghttp_set_type(request, ghttp_type_delete);
     ghttp_set_header(request, http_hdr_Accept_Encoding, "identity");
